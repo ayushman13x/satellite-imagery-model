@@ -1,27 +1,85 @@
-# satellite-imagery-model
-This project investigates whether satellite imagery can provide complementary neighborhood-level information to improve residential property price prediction when combined with traditional tabular housing data. The focus is not to replace structured features, but to critically evaluate the contribution of visual context in a multimodal machine learning pipeline.Project OverviewTraditional property valuation models rely on structured attributes such as living area, construction quality, and geographic coordinates. While these features capture internal property characteristics, they often fail to represent the surrounding environmental context.In this project, satellite images corresponding to property locations are used to capture visual information such as green cover, built-up density, and urban layout. These visual features are combined with a high-performance tabular model to assess whether multimodal learning provides a statistically significant improvement in price prediction.Modeling ApproachThe project follows a rigorous, staged approach to ensure an "Honest Hybrid" evaluation:1. Tabular-Only BaselineA strong baseline is established using 18 raw features and 14 engineered features (e.g., sqft_grade, luxury_index). We utilize an XGBoost regressor trained on log-transformed prices to handle the non-linearities and heteroskedasticity common in real estate data.2. Satellite Image Feature ExtractionSatellite images are processed using a pretrained MobileNetV2 model used strictly as a frozen feature extractor. By removing the final classification layer and applying Global Average Pooling, we generate 1,280-dimensional embeddings for every property location.3. The "Golden Sweep" (Feature Selection)To prevent the "Curse of Dimensionality" and ensure the model does not overfit on visual noise, we implemented a feature selection sweep. Using SelectKBest with an f_regression scoring function, we identified that the top 20 visual features provided the optimal balance between complexity and predictive power.4. Multimodal Fusion ModelA feature-level fusion strategy is applied by concatenating the 32 tabular features with the 20 most predictive visual embeddings. The final model is an XGBoost regressor ($n=2000, \eta=0.02$) trained on this 52-feature combined representation.Repository StructurePlaintextsatellite-tabular-property-valuation/
-│
+# Satellite–Tabular Fusion for Property Price Prediction
+
+This project investigates whether satellite imagery can provide complementary neighborhood-level information to improve residential property price prediction when combined with traditional tabular housing data. The focus is not to replace structured features, but to critically evaluate the contribution of visual context in a multimodal machine learning pipeline.
+
+## Project Overview
+Traditional property valuation models rely on structured attributes such as living area, construction quality, and geographic coordinates. While these features capture internal property characteristics, they often fail to represent the surrounding environmental context. 
+
+In this project, satellite images corresponding to property locations are used to capture visual information such as **green cover, built-up density, and urban layout**. These visual features are combined with a high-performance tabular model to assess whether multimodal learning provides a statistically significant improvement in price prediction.
+
+---
+
+## Modeling Approach
+
+The project follows a rigorous, staged approach to ensure an "Honest Hybrid" evaluation:
+
+### 1. Tabular-Only Baseline
+A strong baseline is established using 18 raw features and 14 engineered features (e.g., `sqft_grade`, `luxury_index`). We utilize an **XGBoost regressor** trained on log-transformed prices to handle the non-linearities and heteroskedasticity common in real estate data.
+
+### 2. Satellite Image Feature Extraction
+Satellite images are processed using a **pretrained MobileNetV2 model** used strictly as a frozen feature extractor. By removing the final classification layer and applying **Global Average Pooling**, we generate 1,280-dimensional embeddings for every property location.
+
+### 3. The "Golden Sweep" (Feature Selection)
+To prevent the "Curse of Dimensionality" and ensure the model does not overfit on visual noise, we implemented a **feature selection sweep**. Using `SelectKBest` with an `f_regression` scoring function, we identified that the **top 20 visual features** provided the optimal balance between complexity and predictive power.
+
+### 4. Multimodal Fusion Model
+A **feature-level fusion strategy** is applied by concatenating the 32 tabular features with the 20 most predictive visual embeddings. The final model is an XGBoost regressor ($n=2000, \eta=0.02$) trained on this 52-feature combined representation.
+
+
+
+---
+
+## Repository Structure
+
+```text
+satellite-tabular-property-valuation/
 ├── notebooks/           # End-to-end experimental pipeline
-│   ├── 1_preprocessing.ipynb    # Data cleaning, log-transforms, and ratio engineering
-│   ├── 2_tabular_baseline.ipynb # Training the non-visual benchmark
-│   ├── 3_vision_extraction.ipynb# CNN feature extraction & MobileNetV2 logic
-│   ├── 4_fusion_model.ipynb     # The "Golden Sweep" (k-best selection) and final fit
-│   └── 5_inference.ipynb        # Generating final predictions on test2.xlsx
-│
+│   ├── 1_image_download.ipynb   # Fetches satellite images for the dataset
+│   ├── 2_preprocessing_eda.ipynb # Data cleaning, feature engineering, and EDA
+│   └── 3_final_model.ipynb      # CNN extraction, Golden Sweep, and Hybrid Model
 ├── src/                 # Reusable production-grade code
-│   └── data_fetcher.py          # Modular Mapbox image downloader with resume capability
-│
+│   └── data_fetcher.py          # Modular Mapbox image downloader (Utility script)
 ├── models/              # Serialized model artifacts
-│   ├── honest_hybrid_k20.pkl    # Final XGBoost model weights
-│   └── final_feature_list.pkl   # Exact column ordering for reproducibility
-│
-├── 23119058_report.pdf  # Comprehensive project report
-├── 23119058_final.csv   # Final price predictions for the test dataset
-├── requirements.txt     # Dependency list (Locked to NumPy < 2.0)
+│   ├── honest_hybrid_k20.pkl    
+│   └── final_feature_list.pkl   
+├── requirements.txt     # Dependency list
 └── README.md            # Project documentation
-Models Implemented1. Tabular-Only Model (Baseline)This model utilizes only structured housing attributes. It includes a custom interaction feature, sqft_grade, which combines structural volume with building quality—the model's most powerful predictor.Pros: Highly interpretable, very fast, and extremely stable.Performance: $R^2 \approx 0.894$.2. Image-Only Model (Exploratory)Satellite embeddings are evaluated independently. This model tests if a house's price can be predicted only by looking at it from space.Findings: Contains a predictive signal for neighborhood wealth but lacks the granularity required to value specific house interiors.3. Multimodal Fusion Model (The Final System)The fusion model integrates the tabular features with the 20 visual winners from the MobileNetV2 extraction.Pros: Captures "curb appeal" and neighborhood density.Performance: Achieved a peak $R^2$ of 0.898, demonstrating that satellite data provides a measurable lift over tabular data alone.Key Findings & ExplainabilityTabular Dominance: Structural features remain the primary drivers of valuation.Neighborhood Context: Satellite imagery successfully identifies "Greenery Premiums" (high vegetation density) and "Density Penalties" (industrial/high-asphalt areas).Feature Importance: High-gain visual features often correlate with proximity to water or public parks, confirming that the model attends to semantically meaningful environmental patterns.How to Set Up the Project1. Clone & EnvironmentBashgit clone https://github.com/yourusername/satellite-tabular-property-valuation.git
+
+How to Set Up the Project
+1. Clone the repository
+Bash
+
+git clone [https://github.com/yourusername/satellite-tabular-property-valuation.git](https://github.com/yourusername/satellite-tabular-property-valuation.git)
 cd satellite-tabular-property-valuation
+2. Create a virtual environment
+Mac / Linux
+
+Bash
+
 python -m venv venv
-# Activate: venv\Scripts\activate (Windows) or source venv/bin/activate (Mac/Linux)
-2. Install DependenciesNote: Due to NumPy 2.0 compatibility issues with Pandas/XGBoost, we use the following:Bashpip install "numpy<2.0" pandas xgboost tensorflow requests scikit-learn
-3. Set API CredentialsThe data_fetcher.py script requires a Mapbox API token. You can pass this directly to the function in your notebook or set it in the script.4. Running the PipelineRun the notebooks in order. Note that data_fetcher.py will automatically skip images that have already been downloaded, allowing for interrupted and resumed sessions.OutputsFinal Prediction: 23119058_final.csv containing id and predicted_price.Visual Logs: Feature importance plots and extraction summaries are generated within the fusion notebook.
+source venv/bin/activate
+Windows
+
+Bash
+
+python -m venv venv
+venv\Scripts\activate
+3. Install dependencies
+Bash
+
+pip install -r requirements.txt
+Running the Project
+The notebooks are designed to be executed in the following order:
+
+1. 1_image_download.ipynb
+This notebook initializes the data ingestion pipeline. It uses the Mapbox Static Maps API and the data_fetcher.py utility to download satellite imagery for all property coordinates.
+
+Command: Run all cells to populate the house_images/ directory.
+
+2. 2_preprocessing_eda.ipynb
+This stage focuses on data integrity and feature engineering. It handles missing values, applies log transformations to the price target, and calculates complex interactions like sqft_grade.
+
+Command: Run all cells to generate the processed tabular features.
+
+3. 3_final_model.ipynb
+The core execution engine. It performs CNN feature extraction (MobileNetV2), executes the "Golden Sweep" feature selection (k=20), and trains the final Multimodal XGBoost model
