@@ -47,41 +47,9 @@ satellite-tabular-property-valuation/
 
 ```
 
-###How to Set Up the Project
-1. Clone the repository
-Bash
+## How to Set Up the Project
 
+### 1. Clone the repository
+```bash
 git clone [https://github.com/yourusername/satellite-tabular-property-valuation.git](https://github.com/yourusername/satellite-tabular-property-valuation.git)
 cd satellite-tabular-property-valuation
-2. Create a virtual environment
-Mac / Linux
-
-Bash
-
-python -m venv venv
-source venv/bin/activate
-Windows
-
-Bash
-
-python -m venv venv
-venv\Scripts\activate
-3. Install dependencies
-Bash
-
-pip install -r requirements.txt
-Running the Project
-The notebooks are designed to be executed in the following order:
-
-1. 1_image_download.ipynb
-This notebook initializes the data ingestion pipeline. It uses the Mapbox Static Maps API and the data_fetcher.py utility to download satellite imagery for all property coordinates.
-
-Command: Run all cells to populate the house_images/ directory.
-
-2. 2_preprocessing_eda.ipynb
-This stage focuses on data integrity and feature engineering. It handles missing values, applies log transformations to the price target, and calculates complex interactions like sqft_grade.
-
-Command: Run all cells to generate the processed tabular features.
-
-3. 3_final_model.ipynb
-The core execution engine. It performs CNN feature extraction (MobileNetV2), executes the "Golden Sweep" feature selection (k=20), and trains the final Multimodal XGBoost model
