@@ -47,9 +47,27 @@ satellite-tabular-property-valuation/
 
 ```
 
-## How to Set Up the Project
+---
 
-### 1. Clone the repository
-```bash
-git clone [https://github.com/yourusername/satellite-tabular-property-valuation.git](https://github.com/yourusername/satellite-tabular-property-valuation.git)
-cd satellite-tabular-property-valuation
+## Running the Project
+The project is structured as a sequential pipeline. To reproduce the results, the notebooks must be executed in the following order:
+
+### 1. 1_image_download.ipynb
+This notebook serves as the **Data Ingestion** layer. It bridges the gap between tabular geographic coordinates and visual environmental context.
+* **Core Logic:** Iterates through the property dataset, passing `lat` and `long` coordinates to the Mapbox Static Maps API via the `data_fetcher.py` utility.
+* **Key Parameters:** Captures satellite tiles at **Zoom Level 16** with a **400x400** pixel resolution to balance detail with computational efficiency.
+* **Output:** Populates the `house_images/` directory with high-resolution satellite imagery used for subsequent feature extraction.
+
+### 2. 2_preprocessing_eda.ipynb
+This notebook handles **Data Integrity and Feature Engineering**. It transforms raw variables into a high-signal feature set optimized for Gradient Boosting.
+* **Data Cleaning:** Implements log-transformations on the `price` target variable to normalize distribution and mitigate the impact of outliers.
+* **Feature Engineering:** Constructs critical interaction variables, most notably `sqft_grade` (Living Area × Construction Quality), which serves as the primary tabular predictor.
+* **Exploratory Analysis:** Includes spatial heatmaps and correlation matrices to visualize the relationship between geographic location and market value.
+* **Output:** A curated tabular dataset ready for multimodal integration.
+
+### 3. 3_final_model.ipynb
+The **Modeling and Fusion** engine of the project. This notebook implements the multimodal learning strategy.
+* **CNN Feature Extraction:** Passes the satellite imagery through a frozen **MobileNetV2** backbone (pretrained on ImageNet) to extract 1,280-dimensional visual embeddings.
+* **The "Golden Sweep":** Applies `SelectKBest` with an `f_regression` scoring function to isolate the **top 20 visual features**, effectively reducing noise and preventing the "Curse of Dimensionality."
+* **Multimodal Fusion:** Concatenates the 32 tabular features with the 20 visual features. This 52-feature matrix is then fed into an **XGBoost Regressor**.
+* **Output:** Generates the final performance metrics ($R^2$, MAE) and the submission-ready `23119058_final.csv`.
