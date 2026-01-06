@@ -70,4 +70,39 @@ The **Modeling and Fusion** engine of the project. This notebook implements the 
 * **CNN Feature Extraction:** Passes the satellite imagery through a frozen **MobileNetV2** backbone (pretrained on ImageNet) to extract 1,280-dimensional visual embeddings.
 * **The "Golden Sweep":** Applies `SelectKBest` with an `f_regression` scoring function to isolate the **top 20 visual features**, effectively reducing noise and preventing the "Curse of Dimensionality."
 * **Multimodal Fusion:** Concatenates the 32 tabular features with the 20 visual features. This 52-feature matrix is then fed into an **XGBoost Regressor**.
-* **Output:** Generates the final performance metrics ($R^2$, MAE) and the submission-ready `23119058_final.csv`.
+* **Output:** Generates the final performance metrics ($R^2$, MAE) and the submission-ready `23117040_final.csv`.
+
+  ---
+
+## Key Findings
+
+The experimental results provided several critical insights into the integration of computer vision with traditional real estate economics:
+
+* **Tabular Dominance:** Structured housing attributes (living area, construction quality, and location) remain the primary drivers of property value.
+* **Marginal Utility of Visuals:** Satellite imagery alone is insufficient for precise valuation but acts as a significant "refiner" of price.
+* **The Hybrid Lift:** Integrating the top 20 visual features through the "Golden Sweep" method resulted in a measurable improvement in R² score, increasing from a tabular baseline of **0.894** to a hybrid peak of **0.898**.
+* **Environmental Signals:** The model successfully identified visual premiums for properties with high vegetation density and price penalties for high-density industrial "gray" cover.
+
+---
+
+## Key Takeaways
+
+1. **Feature Engineering is Vital:** Interaction features like `sqft_grade` capture more variance than raw features alone.
+2. **Dimensionality Control:** Naive fusion of 1,280 CNN features introduces noise; targeted feature selection (k=20) is essential for maintaining model stability.
+3. **Neighborhood Context:** Satellite imagery provides a unique proxy for neighborhood "desirability" that standard tabular data often misses.
+
+---
+
+## Explainability
+
+To ensure the model was not making decisions based on artifacts or noise, explainability methods were applied:
+
+* **Feature Importance (XGBoost):** Gain and Weight metrics confirmed that while structural features lead, specific visual embeddings rank high, indicating the model is actively utilizing the satellite data.
+* **Gred-Cam:** Analysis shows that the selected visual features correlate with physical attributes such as green cover, proximity to arterial roads, and built-up density.
+
+---
+
+## Outputs
+
+* **Final Predictions:** Located in `23117040_final.csv` (includes `id` and `predicted_price`).
+* **Serialized Model:** The trained hybrid regressor is stored in `models/honest_hybrid_k20.pkl` for future inference tasks.
