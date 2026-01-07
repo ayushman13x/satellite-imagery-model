@@ -34,15 +34,16 @@ A **feature-level fusion strategy** is applied by concatenating the 32 tabular f
 ```text
 satellite-tabular-property-valuation/
 ├── notebooks/           # End-to-end experimental pipeline
-│   ├── 1_image_download.ipynb   # Fetches satellite images for the dataset
-│   ├── 2_preprocessing_eda.ipynb # Data cleaning, feature engineering, and EDA
-│   └── 3_final_model.ipynb      # CNN extraction, Golden Sweep, and Hybrid Model
+│   ├── image_download.ipynb   # Fetches satellite images for the dataset
+│   ├── preprocessing_eda.ipynb # Data cleaning, feature engineering, and EDA
+│   └── final_model.ipynb
+|   |__ predicting_test_dataset   
 ├── src/                 # Reusable production-grade code
 │   └── data_fetcher.py          # Modular Mapbox image downloader (Utility script)
 ├── models/              # Serialized model artifacts
 │   ├── honest_hybrid_k20.pkl    
-│   └── final_feature_list.pkl   
-├── requirements.txt     # Dependency list
+│   └── final_feature_list.pkl
+|   |__ selected_vis_features.pkl     # Dependency list
 └── README.md            # Project documentation
 
 ```
